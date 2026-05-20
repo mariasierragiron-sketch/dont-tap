@@ -236,6 +236,7 @@
         let bestScore = localStorage.getItem('bestScore') || 0;
         let gameActive = false;
         let tapTimeout;
+        let audioContext = null;
 
         const scoreEl = document.getElementById('score');
         const bestScoreEl = document.getElementById('bestScore');
@@ -270,10 +271,15 @@
             restartBtn.classList.add('hidden');
             shareBtn.classList.add('hidden');
 
+            scheduleNextTick();
+        }
+
+        function scheduleNextTick() {
+            clearTimeout(tapTimeout);
+            
             // Random time between 1 and 5 seconds
             const randomTime = Math.random() * 4000 + 1000;
 
-            clearTimeout(tapTimeout);
             tapTimeout = setTimeout(() => {
                 if (gameActive) {
                     score++;
@@ -298,7 +304,7 @@
 
                     playSound();
                     triggerVibration();
-                    startGame();
+                    scheduleNextTick();
                 }
             }, randomTime);
         }
@@ -336,6 +342,7 @@
             tapBtn.innerText = "TAP";
             scoreEl.innerText = "0";
             comboEl.innerText = "";
+            gameActive = false;
         }
 
         function shareScore() {
@@ -373,22 +380,28 @@
         }
 
         function playSound() {
-            // Simple beep using Web Audio API
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const oscillator = audioContext.createOscillator();
-            const gain = audioContext.createGain();
+            try {
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
 
-            oscillator.connect(gain);
-            gain.connect(audioContext.destination);
+                const oscillator = audioContext.createOscillator();
+                const gain = audioContext.createGain();
 
-            oscillator.frequency.value = 800;
-            oscillator.type = 'sine';
+                oscillator.connect(gain);
+                gain.connect(audioContext.destination);
 
-            gain.gain.setValueAtTime(0.3, audioContext.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                oscillator.frequency.value = 800;
+                oscillator.type = 'sine';
 
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.1);
+            } catch (e) {
+                console.log('Audio no soportado');
+            }
         }
     </script>
 </body>
