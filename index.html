@@ -3,355 +3,234 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Don't Tap - El juego más adictivo. ¿Cuántos puntos consigues?">
-    <meta name="theme-color" content="#1a1a1a">
-    <link rel="manifest" href="manifest.json">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%231a1a1a' width='180' height='180'/><text x='50%' y='50%' font-size='120' fill='%23FF6B6B' text-anchor='middle' dominant-baseline='central' font-weight='bold'>🔥</text></svg>">
-    <title>Don't Tap - Juego</title>
+    <meta name="description" content="Don't Tap - El juego más adictivo">
+    <title>Don't Tap</title>
     <style>
-        * {
+        body {
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            color: #fff;
-            overflow: hidden;
+            color: white;
         }
-
-        .container {
+        
+        .game {
             text-align: center;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 30px;
+            background: rgba(0,0,0,0.8);
+            padding: 40px;
             border-radius: 20px;
-            box-shadow: 0 8px 32px rgba(255, 107, 107, 0.3);
-            max-width: 500px;
-            width: 90%;
+            box-shadow: 0 0 30px rgba(255,107,107,0.5);
+            max-width: 400px;
         }
-
+        
         h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
             color: #FF6B6B;
-            text-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
+            font-size: 2.5em;
+            margin: 0 0 10px 0;
+            text-shadow: 0 0 20px rgba(255,107,107,0.5);
         }
-
+        
         .subtitle {
-            font-size: 0.9em;
             color: #aaa;
+            font-size: 0.9em;
             margin-bottom: 30px;
         }
-
-        .score-display {
+        
+        .score {
             font-size: 3em;
-            font-weight: bold;
             color: #FFD700;
             margin: 20px 0;
-            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
-        }
-
-        .best-score {
-            font-size: 0.9em;
-            color: #888;
-            margin-bottom: 30px;
-        }
-
-        .best-score span {
-            color: #FFD700;
             font-weight: bold;
         }
-
+        
+        .best {
+            color: #888;
+            font-size: 0.9em;
+            margin-bottom: 20px;
+        }
+        
         .message {
             font-size: 1.5em;
-            margin: 20px 0;
             color: #FF6B6B;
-            min-height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            margin: 20px 0;
+            height: 40px;
             font-weight: bold;
         }
-
-        .tap-button {
+        
+        button {
             width: 150px;
             height: 150px;
             border-radius: 50%;
+            border: 3px solid #FF6B6B;
+            background: linear-gradient(135deg, #FF6B6B, #FF5252);
+            color: white;
             font-size: 2em;
             font-weight: bold;
-            border: 3px solid #FF6B6B;
-            background: linear-gradient(135deg, #FF6B6B 0%, #FF5252 100%);
-            color: white;
             cursor: pointer;
             margin: 20px auto;
+            display: block;
+            box-shadow: 0 0 20px rgba(255,107,107,0.5);
             transition: all 0.1s;
-            box-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
-
-        .tap-button:active {
+        
+        button:active {
             transform: scale(0.95);
-            box-shadow: 0 0 40px rgba(255, 107, 107, 0.8);
         }
-
-        .restart-button {
-            padding: 12px 30px;
-            font-size: 1.1em;
-            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-            color: white;
+        
+        .controls {
+            margin-top: 20px;
+        }
+        
+        .restart, .share {
+            padding: 10px 20px;
+            margin: 5px;
             border: none;
-            border-radius: 25px;
+            border-radius: 20px;
             cursor: pointer;
-            margin: 10px 5px;
-            transition: all 0.3s;
-            box-shadow: 0 0 20px rgba(76, 175, 80, 0.3);
-        }
-
-        .restart-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0 30px rgba(76, 175, 80, 0.5);
-        }
-
-        .share-button {
-            padding: 12px 30px;
-            font-size: 1.1em;
-            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            font-size: 1em;
             color: white;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            margin: 10px 5px;
-            transition: all 0.3s;
-            box-shadow: 0 0 20px rgba(33, 150, 243, 0.3);
-        }
-
-        .share-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0 30px rgba(33, 150, 243, 0.5);
-        }
-
-        .hidden {
+            font-weight: bold;
             display: none;
         }
-
-        @keyframes popIn {
-            0% { transform: scale(0); opacity: 0; }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); opacity: 1; }
+        
+        .restart {
+            background: #4CAF50;
         }
-
-        .milestone {
-            animation: popIn 0.5s ease-out;
+        
+        .share {
+            background: #2196F3;
         }
-
-        @keyframes flash {
-            0%, 100% { background-color: rgba(255, 107, 107, 0); }
-            50% { background-color: rgba(255, 107, 107, 0.3); }
-        }
-
-        .flash {
-            animation: flash 0.5s;
-        }
-
-        @media (max-width: 600px) {
-            h1 { font-size: 2em; }
-            .score-display { font-size: 2.5em; }
-            .tap-button {
-                width: 120px;
-                height: 120px;
-                font-size: 1.5em;
-            }
-            .container { padding: 20px; }
+        
+        .show {
+            display: inline-block !important;
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="game">
         <h1>🔥 Don't Tap 🔥</h1>
         <p class="subtitle">¿Cuánto aguantas sin tocar?</p>
-
-        <div class="score-display" id="score">0</div>
-        <div class="best-score">Mejor: <span id="bestScore">0</span></div>
-
-        <div class="message" id="message">¡Toca para empezar!</div>
-
-        <button class="tap-button" id="tapBtn" onclick="handleTap()">TAP</button>
-
-        <div>
-            <button class="restart-button hidden" id="restartBtn" onclick="handleRestart()">🔄 Otra vez</button>
-            <button class="share-button hidden" id="shareBtn" onclick="handleShare()">Compartir 🔥</button>
+        
+        <div class="score" id="score">0</div>
+        <div class="best">Mejor: <span id="best">0</span></div>
+        
+        <div class="message" id="msg">¡Toca para empezar!</div>
+        
+        <button id="btn" onclick="tap()">TAP</button>
+        
+        <div class="controls">
+            <button class="restart" id="restart" onclick="reset()">🔄 Otra vez</button>
+            <button class="share" id="share" onclick="compartir()">Compartir 🔥</button>
         </div>
     </div>
 
     <script>
-        let gameState = 'idle'; // idle, playing, gameover
-        let score = 0;
-        let bestScore = parseInt(localStorage.getItem('bestScore')) || 0;
-        let timerID = null;
+        let puntos = 0;
+        let mejor = localStorage.getItem('mejor') || 0;
+        let jugando = false;
+        let espera = null;
 
-        const scoreEl = document.getElementById('score');
-        const bestScoreEl = document.getElementById('bestScore');
-        const messageEl = document.getElementById('message');
-        const tapBtn = document.getElementById('tapBtn');
-        const restartBtn = document.getElementById('restartBtn');
-        const shareBtn = document.getElementById('shareBtn');
+        document.getElementById('best').textContent = mejor;
 
-        bestScoreEl.textContent = bestScore;
-
-        if ("serviceWorker" in navigator) {
-            navigator.serviceWorker.register("service-worker.js").catch(() => {});
-        }
-
-        function handleTap() {
-            if (gameState === 'idle') {
-                startGame();
-            } else if (gameState === 'playing') {
-                endGame();
-            }
-        }
-
-        function startGame() {
-            gameState = 'playing';
-            score = 0;
-            scoreEl.textContent = score;
-            messageEl.textContent = "¡No toques! 😈";
-            tapBtn.textContent = "NO TOQUES";
-            restartBtn.classList.add('hidden');
-            shareBtn.classList.add('hidden');
-
-            scheduleNextPoint();
-        }
-
-        function scheduleNextPoint() {
-            if (timerID !== null) {
-                clearTimeout(timerID);
-            }
-
-            const delay = Math.random() * 4000 + 1000;
-
-            timerID = setTimeout(() => {
-                if (gameState === 'playing') {
-                    score++;
-                    scoreEl.textContent = score;
-                    
-                    playSound();
-                    vibrate(100);
-
-                    updateMessage();
-                    scheduleNextPoint();
-                }
-            }, delay);
-        }
-
-        function updateMessage() {
-            const messages = {
-                1: "Punto! 🎯",
-                5: "¡Vamos! 🔥",
-                10: "¡Eres increíble! 🚀",
-                20: "¡Leyenda! 👑",
-                50: "¡DIOS! 🌟"
-            };
-
-            if (messages[score]) {
-                messageEl.textContent = messages[score];
-                messageEl.classList.remove('milestone');
-                void messageEl.offsetWidth;
-                messageEl.classList.add('milestone');
-            } else {
-                messageEl.textContent = "¡Sigue! 💪";
-            }
-        }
-
-        function endGame() {
-            gameState = 'gameover';
-            if (timerID !== null) {
-                clearTimeout(timerID);
-            }
-
-            if (score > bestScore) {
-                bestScore = score;
-                bestScoreEl.textContent = bestScore;
-                localStorage.setItem('bestScore', bestScore);
-                messageEl.textContent = "¡NUEVO RÉCORD! 🏆";
-            } else {
-                messageEl.textContent = "Game Over 😭";
-            }
-
-            tapBtn.textContent = "PERDISTE";
-            restartBtn.classList.remove('hidden');
-            shareBtn.classList.remove('hidden');
-            vibrate(300);
-            flashScreen();
-
-            setTimeout(() => {
-                if (gameState === 'gameover') {
-                    messageEl.textContent = "¿Otro intento?";
-                }
-            }, 2000);
-        }
-
-        function handleRestart() {
-            gameState = 'idle';
-            messageEl.textContent = "¡Toca para empezar!";
-            tapBtn.textContent = "TAP";
-            scoreEl.textContent = "0";
-            score = 0;
-        }
-
-        function handleShare() {
-            const text = `He conseguido ${score} puntos en Don't Tap 😈 ¿me superas?`;
-            if (navigator.share) {
-                navigator.share({
-                    title: "Don't Tap",
-                    text: text,
-                    url: window.location.href
-                }).catch(() => {});
-            } else {
-                alert(text);
-            }
-        }
-
-        function playSound() {
+        function beep() {
             try {
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = audioCtx.createOscillator();
-                const gainNode = audioCtx.createGain();
+                let ctx = new (window.AudioContext || window.webkitAudioContext)();
+                let osc = ctx.createOscillator();
+                let gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.frequency.value = 800;
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+                osc.start(ctx.currentTime);
+                osc.stop(ctx.currentTime + 0.1);
+            } catch(e) {}
+        }
 
-                oscillator.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
+        function vibra() {
+            if (navigator.vibrate) navigator.vibrate(100);
+        }
 
-                oscillator.frequency.value = 800;
-                oscillator.type = 'sine';
-
-                gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-
-                oscillator.start(audioCtx.currentTime);
-                oscillator.stop(audioCtx.currentTime + 0.1);
-            } catch (e) {
-                console.log('Audio no disponible');
+        function tap() {
+            if (!jugando) {
+                empezar();
+            } else {
+                perder();
             }
         }
 
-        function vibrate(duration) {
-            if (navigator.vibrate) {
-                navigator.vibrate(duration);
-            }
+        function empezar() {
+            jugando = true;
+            puntos = 0;
+            document.getElementById('score').textContent = puntos;
+            document.getElementById('msg').textContent = "¡No toques! 😈";
+            document.getElementById('btn').textContent = "NO TOQUES";
+            document.getElementById('restart').classList.remove('show');
+            document.getElementById('share').classList.remove('show');
+            proxPunto();
         }
 
-        function flashScreen() {
-            document.body.classList.add('flash');
-            setTimeout(() => {
-                document.body.classList.remove('flash');
-            }, 500);
+        function proxPunto() {
+            if (!jugando) return;
+            
+            clearTimeout(espera);
+            let tiempo = Math.random() * 4000 + 1000;
+            
+            espera = setTimeout(function() {
+                if (jugando) {
+                    puntos++;
+                    document.getElementById('score').textContent = puntos;
+                    beep();
+                    vibra();
+                    
+                    if (puntos == 1) document.getElementById('msg').textContent = "Punto 1 🎯";
+                    else if (puntos == 5) document.getElementById('msg').textContent = "¡Vamos! 🔥";
+                    else if (puntos == 10) document.getElementById('msg').textContent = "¡Increíble! 🚀";
+                    else if (puntos == 20) document.getElementById('msg').textContent = "¡Leyenda! 👑";
+                    else document.getElementById('msg').textContent = "¡Sigue! " + puntos;
+                    
+                    proxPunto();
+                }
+            }, tiempo);
+        }
+
+        function perder() {
+            jugando = false;
+            clearTimeout(espera);
+            
+            if (puntos > mejor) {
+                mejor = puntos;
+                localStorage.setItem('mejor', mejor);
+                document.getElementById('best').textContent = mejor;
+                document.getElementById('msg').textContent = "¡NUEVO RÉCORD! 🏆";
+            } else {
+                document.getElementById('msg').textContent = "Game Over 😭";
+            }
+            
+            document.getElementById('btn').textContent = "PERDISTE";
+            document.getElementById('restart').classList.add('show');
+            document.getElementById('share').classList.add('show');
+        }
+
+        function reset() {
+            document.getElementById('msg').textContent = "¡Toca para empezar!";
+            document.getElementById('btn').textContent = "TAP";
+            document.getElementById('score').textContent = "0";
+            document.getElementById('restart').classList.remove('show');
+            document.getElementById('share').classList.remove('show');
+        }
+
+        function compartir() {
+            let texto = "He conseguido " + puntos + " puntos en Don't Tap 😈 ¿me superas?";
+            if (navigator.share) {
+                navigator.share({ title: "Don't Tap", text: texto, url: window.location.href });
+            } else {
+                alert(texto);
+            }
         }
     </script>
 </body>
