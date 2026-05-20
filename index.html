@@ -102,11 +102,6 @@
             box-shadow: 0 0 40px rgba(255, 107, 107, 0.8);
         }
 
-        .tap-button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
         .restart-button {
             padding: 12px 30px;
             font-size: 1.1em;
@@ -143,14 +138,8 @@
             box-shadow: 0 0 30px rgba(33, 150, 243, 0.5);
         }
 
-        .combo {
-            font-size: 1.2em;
-            color: #FFD700;
-            margin-top: 10px;
-        }
-
-        .milestone-message {
-            animation: popIn 0.5s ease-out;
+        .hidden {
+            display: none;
         }
 
         @keyframes popIn {
@@ -167,14 +156,8 @@
             }
         }
 
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            75% { transform: translateX(10px); }
-        }
-
-        .shake {
-            animation: shake 0.5s;
+        .milestone {
+            animation: popIn 0.5s ease-out;
         }
 
         @keyframes flash {
@@ -184,10 +167,6 @@
 
         .flash {
             animation: flash 0.5s;
-        }
-
-        .hidden {
-            display: none;
         }
 
         @media (max-width: 600px) {
@@ -219,42 +198,37 @@
         <div class="score-display" id="score">0</div>
         <div class="best-score">Mejor: <span id="bestScore">0</span></div>
 
-        <div class="message" id="text">¡Toca para empezar!</div>
+        <div class="message" id="message">¡Toca para empezar!</div>
 
-        <button class="tap-button" id="tapBtn" onclick="handleTap()">TAP</button>
-
-        <div class="combo" id="combo"></div>
+        <button class="tap-button" id="tapBtn" onclick="onTap()">TAP</button>
 
         <div>
-            <button class="restart-button hidden" id="restartBtn" onclick="restartGame()">🔄 Otra vez</button>
-            <button class="share-button hidden" id="shareBtn" onclick="shareScore()">Compartir 🔥</button>
+            <button class="restart-button hidden" id="restartBtn" onclick="restart()">🔄 Otra vez</button>
+            <button class="share-button hidden" id="shareBtn" onclick="share()">Compartir 🔥</button>
         </div>
     </div>
 
     <script>
         let score = 0;
-        let bestScore = localStorage.getItem('bestScore') || 0;
-        let gameActive = false;
-        let tapTimeout;
-        let audioContext = null;
+        let bestScore = parseInt(localStorage.getItem('bestScore')) || 0;
+        let gameRunning = false;
+        let waitTimeout = null;
 
         const scoreEl = document.getElementById('score');
         const bestScoreEl = document.getElementById('bestScore');
-        const text = document.getElementById('text');
+        const messageEl = document.getElementById('message');
         const tapBtn = document.getElementById('tapBtn');
         const restartBtn = document.getElementById('restartBtn');
         const shareBtn = document.getElementById('shareBtn');
-        const comboEl = document.getElementById('combo');
 
         bestScoreEl.innerText = bestScore;
 
-        // Service Worker Registration
         if ("serviceWorker" in navigator) {
             navigator.serviceWorker.register("service-worker.js");
         }
 
-        function handleTap() {
-            if (!gameActive) {
+        function onTap() {
+            if (!gameRunning) {
                 startGame();
             } else {
                 endGame();
@@ -262,146 +236,118 @@
         }
 
         function startGame() {
-            gameActive = true;
+            gameRunning = true;
             score = 0;
             scoreEl.innerText = score;
-            text.innerText = "¡No toques! 😈";
-            comboEl.innerText = "";
+            messageEl.innerText = "¡No toques! 😈";
             tapBtn.innerText = "NO TOQUES";
             restartBtn.classList.add('hidden');
             shareBtn.classList.add('hidden');
 
-            scheduleNextTick();
+            waitForTimeout();
         }
 
-        function scheduleNextTick() {
-            clearTimeout(tapTimeout);
-            
-            // Random time between 1 and 5 seconds
+        function waitForTimeout() {
+            if (!gameRunning) return;
+
+            clearTimeout(waitTimeout);
             const randomTime = Math.random() * 4000 + 1000;
 
-            tapTimeout = setTimeout(() => {
-                if (gameActive) {
-                    score++;
-                    scoreEl.innerText = score;
-                    
-                    // Milestone messages
-                    if (score === 5) {
-                        text.innerText = "¡Vamos! 🔥";
-                        triggerMilestoneEffect();
-                    } else if (score === 10) {
-                        text.innerText = "¡Eres increíble! 🚀";
-                        triggerMilestoneEffect();
-                    } else if (score === 20) {
-                        text.innerText = "¡Leyenda! 👑";
-                        triggerMilestoneEffect();
-                    } else if (score === 50) {
-                        text.innerText = "¡DIOS! 🌟";
-                        triggerMilestoneEffect();
-                    } else {
-                        text.innerText = "¡Sigue! 💪";
-                    }
+            waitTimeout = setTimeout(() => {
+                if (!gameRunning) return;
 
-                    playSound();
-                    triggerVibration();
-                    scheduleNextTick();
+                score++;
+                scoreEl.innerText = score;
+                playSound();
+                vibrate(100);
+
+                if (score === 5) {
+                    messageEl.innerText = "¡Vamos! 🔥";
+                    animate();
+                } else if (score === 10) {
+                    messageEl.innerText = "¡Eres increíble! 🚀";
+                    animate();
+                } else if (score === 20) {
+                    messageEl.innerText = "¡Leyenda! 👑";
+                    animate();
+                } else if (score === 50) {
+                    messageEl.innerText = "¡DIOS! 🌟";
+                    animate();
+                } else {
+                    messageEl.innerText = "¡Sigue! 💪";
                 }
+
+                waitForTimeout();
             }, randomTime);
         }
 
         function endGame() {
-            gameActive = false;
-            clearTimeout(tapTimeout);
+            gameRunning = false;
+            clearTimeout(waitTimeout);
 
             if (score > bestScore) {
                 bestScore = score;
                 bestScoreEl.innerText = bestScore;
                 localStorage.setItem('bestScore', bestScore);
-                text.innerText = "¡NUEVO RÉCORD! 🏆";
+                messageEl.innerText = "¡NUEVO RÉCORD! 🏆";
             } else {
-                text.innerText = "Game Over 😭";
+                messageEl.innerText = "Game Over 😭";
             }
 
             tapBtn.innerText = "PERDISTE";
             restartBtn.classList.remove('hidden');
             shareBtn.classList.remove('hidden');
-            triggerVibration(300);
-            triggerFlash();
-
-            setTimeout(() => {
-                text.innerText = "Otra vez... 😈";
-            }, 1500);
-
-            setTimeout(() => {
-                text.innerText = "Puedes hacerlo mejor…";
-            }, 3000);
+            vibrate(300);
+            flashScreen();
         }
 
-        function restartGame() {
-            text.innerText = "¡Toca para empezar!";
+        function restart() {
+            messageEl.innerText = "¡Toca para empezar!";
             tapBtn.innerText = "TAP";
             scoreEl.innerText = "0";
-            comboEl.innerText = "";
-            gameActive = false;
+            score = 0;
         }
 
-        function shareScore() {
-            const textShare = `He conseguido ${score} puntos en Don't Tap 😈 ¿me superas?`;
-
+        function share() {
+            const text = `He conseguido ${score} puntos en Don't Tap 😈 ¿me superas?`;
             if (navigator.share) {
                 navigator.share({
                     title: "Don't Tap",
-                    text: textShare,
+                    text: text,
                     url: window.location.href
                 });
             } else {
-                alert(textShare);
+                alert(text);
             }
-        }
-
-        function triggerVibration(duration = 100) {
-            if (navigator.vibrate) {
-                navigator.vibrate(duration);
-            }
-        }
-
-        function triggerFlash() {
-            document.body.classList.add('flash');
-            setTimeout(() => {
-                document.body.classList.remove('flash');
-            }, 500);
-        }
-
-        function triggerMilestoneEffect() {
-            text.classList.add('milestone-message');
-            setTimeout(() => {
-                text.classList.remove('milestone-message');
-            }, 500);
         }
 
         function playSound() {
             try {
-                if (!audioContext) {
-                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                }
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.frequency.value = 800;
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+                osc.start(ctx.currentTime);
+                osc.stop(ctx.currentTime + 0.1);
+            } catch (e) {}
+        }
 
-                const oscillator = audioContext.createOscillator();
-                const gain = audioContext.createGain();
+        function vibrate(ms) {
+            if (navigator.vibrate) navigator.vibrate(ms);
+        }
 
-                oscillator.connect(gain);
-                gain.connect(audioContext.destination);
+        function animate() {
+            messageEl.classList.add('milestone');
+            setTimeout(() => messageEl.classList.remove('milestone'), 500);
+        }
 
-                oscillator.frequency.value = 800;
-                oscillator.type = 'sine';
-
-                gain.gain.setValueAtTime(0.3, audioContext.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-
-                oscillator.start(audioContext.currentTime);
-                oscillator.stop(audioContext.currentTime + 0.1);
-            } catch (e) {
-                console.log('Audio no soportado');
-            }
+        function flashScreen() {
+            document.body.classList.add('flash');
+            setTimeout(() => document.body.classList.remove('flash'), 500);
         }
     </script>
 </body>
